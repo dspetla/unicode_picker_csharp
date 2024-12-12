@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 namespace UnicodePicker
 {
@@ -26,10 +23,12 @@ namespace UnicodePicker
 
         private void LoadUnicodeData()
         {
-            string filePath = "unicode_names.ini";
             try
             {
-                foreach (var line in File.ReadLines(filePath))
+                // Load embedded resource string
+                var data = Properties.Resources.UnicodeData;
+
+                foreach (var line in data.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (!string.IsNullOrWhiteSpace(line) && line.Contains("="))
                     {
@@ -42,7 +41,7 @@ namespace UnicodePicker
                             // Validate the code point
                             if (int.TryParse(code, System.Globalization.NumberStyles.HexNumber, null, out int codePoint) &&
                                 codePoint >= 0x0000 && codePoint <= 0x10FFFF &&
-                                !(codePoint >= 0xD800 && codePoint <= 0xDFFF)) // Exclude surrogate range
+                                !(codePoint >= 0xD800 && codePoint <= 0xDFFF)) // Exclude invalid surrogate ranges
                             {
                                 unicodeData[code] = name;
                             }
@@ -58,7 +57,6 @@ namespace UnicodePicker
                 MessageBox.Show($"Error loading Unicode data: {ex.Message}");
             }
         }
-
 
 
         // Update ListBox
